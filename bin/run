@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -u
+
+IMAGE=${NINECC_DOCKER_USER:-$USER}/${NINECC_IMAGE:-9cc}:latest
+CONTAINER_NAME=${NINECC_CONTAINER:-9cc}
+LOGIN_USER=${NINECC_LOGIN_USER:-$USER}
+PROJECT_DIR=${NINECC_PROJECT_DIR:-9cc}
+SHARED_PATH=$(cd $(dirname $0); pwd)/../$PROJECT_DIR
+
+docker run \
+    --interactive \
+    --tty \
+    --user $LOGIN_USER \
+    --volume $SHARED_PATH:/home/$LOGIN_USER/$PROJECT_DIR \
+    --name $CONTAINER_NAME \
+    $IMAGE

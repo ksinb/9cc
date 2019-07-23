@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -u
+
+CONTAINER_NAME=${NINECC_CONTAINER:-9cc}
+
+docker start -i $CONTAINER_NAME

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -u
+
+TAG=${NINECC_DOCKER_USER:-$USER}/${NINECC_IMAGE:-9cc}
+VERSION=${1:-latest}
+
+docker build \
+    --tag $TAG:$VERSION \
+    --build-arg default_user=${NINECC_LOGIN_USER:-$USER} \
+    .
