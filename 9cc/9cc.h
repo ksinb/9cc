@@ -13,7 +13,11 @@ enum {
   TK_DIV,  // /
   TK_MUL,  // *
   TK_LPAR, // (
-  TK_RPAR, // )  
+  TK_RPAR, // )
+  TK_GT,   // >
+  TK_LT,   // <
+  TK_GE,   // >=
+  TK_LE,   // <=  
   TK_EOF   // 入力の終わりを表すトークン
 };
 
@@ -48,15 +52,21 @@ struct Node {
   int val;       // kindがND_NUMの場合のみ使う
 };
 
+// lexer
+Token *tokenize(char *p);
+
+// parser
+bool consume(int op);
+void expect(char op);
+int expect_number();
+bool at_eof();
+
 // EBNF
 Node *expr();
 Node *mul();
 Node *term();
 Node *unary();
 
-bool consume(int op);
-void expect(char op);
-int expect_number();
+// codegen
 void gen(Node *node);
-Token *tokenize(char *p);
 bool at_eof();
