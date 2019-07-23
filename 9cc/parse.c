@@ -63,6 +63,45 @@ bool at_eof() {
 }
 
 Node *expr() {
+  Node *node = equility();
+  return node;
+}
+
+Node *equility() {
+  Node *node = relational();
+
+  for (;;) {
+    if (consume(TK_EQ_EQ)) {
+      node = new_node(ND_EQ, node, relational());
+    } else if (consume(TK_NOT_EQ)) {
+      node = new_node(ND_NE, node, relational());
+    } else {
+      return node;
+    }
+  }
+}
+
+Node *relational() {
+  Node *node = add();
+
+  for (;;) {
+    if (consume(TK_LT)) {
+      return new_node(ND_LT, node, add());
+    } 
+    if (consume(TK_GT)) {
+      return new_node(ND_LT, add(), node);
+    }
+    if (consume(TK_LE)) {
+      return new_node(ND_LE, node, add());
+    }
+    if (consume(TK_GE)) {
+      return new_node(ND_LE, add(), node);
+    }
+    return node;
+  }
+}
+
+Node *add() {
   Node *node = mul();
 
   for (;;) {

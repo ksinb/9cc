@@ -26,15 +26,31 @@ Token *tokenize(char *p)
       continue;
     }
 
+    if (strncmp(p, "==", 2) == 0)
+    {
+      cur = new_token(TK_EQ_EQ, cur, p);
+      p += 2;
+      continue;
+    }
+
+    if (strncmp(p, "!=", 2) == 0)
+    {
+      cur = new_token(TK_NOT_EQ, cur, p);
+      p += 2;
+      continue;
+    }
+
     if (strncmp(p, ">=", 2) == 0)
     {
-      cur = new_token(TK_GE, cur, p++);
+      cur = new_token(TK_GE, cur, p);
+      p += 2;
       continue;
     }
 
     if (strncmp(p, "<=", 2) == 0)
     {
-      cur = new_token(TK_LE, cur, p++);
+      cur = new_token(TK_LE, cur, p);
+      p += 2;
       continue;
     }
 

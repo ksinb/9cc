@@ -7,24 +7,26 @@
 
 // トークンの型
 enum {
-  TK_NUM,  // 数値
-  TK_ADD,  // +
-  TK_SUB,  // -
-  TK_DIV,  // /
-  TK_MUL,  // *
-  TK_LPAR, // (
-  TK_RPAR, // )
-  TK_GT,   // >
-  TK_LT,   // <
-  TK_GE,   // >=
-  TK_LE,   // <=  
-  TK_EOF   // 入力の終わりを表すトークン
+  TK_NUM,    // 数値
+  TK_ADD,    // +
+  TK_SUB,    // -
+  TK_DIV,    // /
+  TK_MUL,    // *
+  TK_LPAR,   // (
+  TK_RPAR,   // )
+  TK_EQ_EQ,  // ==
+  TK_NOT_EQ, // !=
+  TK_LT,     // <
+  TK_LE,     // <=  
+  TK_GT,     // >
+  TK_GE,     // >=
+  TK_EOF     // 入力の終わりを表すトークン
 };
 
 typedef struct Token Token;
 
 struct Token {
-  int type; // トークンの型
+  int type;       // トークンの型
   Token *next;    // 次の入力トークン
   int val;        // kindがTK_NUMの場合、その数値
   char *str;      // トークン文字列
@@ -36,11 +38,15 @@ Token *token;
 
 // 抽象構文木のノードの型
 typedef enum {
-  ND_ADD, // +
-  ND_SUB, // -
-  ND_DIV,
-  ND_MUL, // *
-  ND_NUM // 整数
+  ND_ADD,  // +
+  ND_SUB,  // -
+  ND_DIV,  // /
+  ND_MUL,  // *
+  ND_EQ,   // ==
+  ND_NE,   // !=
+  ND_LT,   // <
+  ND_LE,   // <=  
+  ND_NUM   // 整数
 } NodeType;
 
 typedef struct Node Node;
@@ -63,10 +69,12 @@ bool at_eof();
 
 // EBNF
 Node *expr();
+Node *equility();
+Node *relational();
+Node *add();
 Node *mul();
-Node *term();
 Node *unary();
+Node *term();
 
 // codegen
 void gen(Node *node);
-bool at_eof();
