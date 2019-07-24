@@ -74,7 +74,7 @@ Node *new_node_num(int val) {
 Node *new_node_ident(char *name) {
   Node *node = calloc(1, sizeof(Node));
   node->type = ND_LVAR;
-  node->offset = (name[0] = 'a' + 1) * 8;
+  node->offset = (name[0] - 'a' + 1) * 8;
   return node;
 }
 
@@ -99,7 +99,7 @@ Node *expr() {
 Node *assign() {
   Node *node = equility();
   if (consume(TK_EQ)) {
-    node = new_node(ND_EQ, node, assign());
+    node = new_node(ND_ASSIGN, node, assign());
   }
   return node;
 }

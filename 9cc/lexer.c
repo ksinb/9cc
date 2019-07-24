@@ -108,7 +108,13 @@ Token *tokenize(char *p)
       continue;
     }
 
-    if ('a' <= *p && *p == 'z')
+    if (*p == '=')
+    {
+      cur = new_token(TK_EQ, cur, p++);
+      continue;
+    }
+
+    if ('a' <= *p && *p <= 'z')
     {
       cur = new_token(TK_IDENT, cur, p++);
       continue;
@@ -122,6 +128,7 @@ Token *tokenize(char *p)
     }
 
     perror("トークナイズできません");
+    exit(1);
   }
 
   new_token(TK_EOF, cur, p);
