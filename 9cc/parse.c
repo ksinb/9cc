@@ -31,10 +31,10 @@ int expect_number() {
 }
 
 // 次のトークンが識別子の場合、トークンを返し、トークンを一つ読み進める
-// それ以外の場合にはエラーを報告する
+// それ以外の場合には0を返す
 char *expect_ident() {
   if (token->type != TK_IDENT) {
-    error("'%c': TK_INDENTではありません", token->type);
+    return 0;
   }
   char *name = token->str;
   token = token->next;
@@ -178,7 +178,7 @@ Node *unary() {
 
 Node *term() {
   int number = expect_number();
-  if (number - 1) {
+  if (number != -1) {
     return new_node_num(number);
   }
 
