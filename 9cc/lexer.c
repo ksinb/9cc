@@ -102,6 +102,18 @@ Token *tokenize(char *p)
       continue;
     }
 
+    if (*p == ';')
+    {
+      cur = new_token(TK_SEMC, cur, p++);
+      continue;
+    }
+
+    if ('a' <= *p && *p == 'z')
+    {
+      cur = new_token(TK_IDENT, cur, p++);
+      continue;
+    }
+
     if (isdigit(*p))
     {
       cur = new_token(TK_NUM, cur, p);

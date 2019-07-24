@@ -1,5 +1,50 @@
 #include "9cc.h"
 
+// エラーを報告するための関数
+// printfと同じ引数を取る
+void error(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+// 次のトークンが期待している記号のときは、トークンを一つ読み進める
+// それ以外の場合にはエラーを報告する
+void expect(char type) {
+  if (token->type != type) {
+    error("token error: '%d' expected, but got '%d'", type, token->type);
+  }
+  token = token->next;
+}
+
+// 次のトークンが数値の場合、トークンを一つ読み進めてその数値を返す
+// それ以外の場合には-1を返す
+int expect_number() {
+  if (token->type != TK_NUM) {
+    return -1;
+  }
+  int val = token->val;
+  token = token->next;
+  return val;
+}
+
+// 次のトークンが識別子の場合、トークンを返し、トークンを一つ読み進める
+// それ以外の場合にはエラーを報告する
+char *expect_ident() {
+  if (token->type != TK_IDENT) {
+    error("'%c': TK_INDENTではありません", token->type);
+  }
+  char *name = token->str;
+  token = token->next;
+  return name;
+}
+
+bool at_eof() {
+  return token->type == TK_EOF;
+}
+
 // 次のトークンが期待している記号のときは、トークンを一つ読み進めて真を返す
 // それ以外の場合は偽を返す
 bool consume(int type) {
@@ -26,44 +71,36 @@ Node *new_node_num(int val) {
   return node;
 }
 
-// エラーを報告するための関数
-// printfと同じ引数を取る
-void error(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
-  exit(1);
+Node *new_node_ident(char *name) {
+  Node *node = calloc(1, sizeof(Node));
+  node->type = ND_LVAR;
+  node->offset = (name[0] = 'a' + 1) * 8;
+  return node;
 }
 
-// 次のトークンが期待している記号のときは、トークンを一つ読み進める
-// それ以外の場合にはエラーを報告する
-void expect(char type) {
-  if (token->type != type)
-  {
-    error("expect: '%d'は%c'ではありません", token->type, type);
+void *program() {
+  int i = 0;
+  while (!at_eof()) {
+    code[i++] = stmt();
   }
-  token = token->next;
+  code[i] = NULL;
 }
 
-// 次のトークンが数値の場合、トークンを一つ読み進めてその数値を返す
-// それ以外の場合にはエラーを報告する
-int expect_number() {
-  if (token->type != TK_NUM)
-  {
-    error("数ではありません");
-  }
-  int val = token->val;
-  token = token->next;
-  return val;
-}
-
-bool at_eof() {
-  return token->type == TK_EOF;
+Node *stmt() {
+  Node *node = expr();
+  expect(TK_SEMC);
+  return node;
 }
 
 Node *expr() {
+  return assign();
+}
+
+Node *assign() {
   Node *node = equility();
+  if (consume(TK_EQ)) {
+    node = new_node(ND_EQ, node, assign());
+  }
   return node;
 }
 
@@ -129,18 +166,6 @@ Node *mul() {
   }
 }
 
-Node *term() {
-  // 次のトークンが"("なら、"(" expr ")"のはず
-  if (consume(TK_LPAR)) {
-    Node *node = expr();
-    expect(TK_RPAR);
-    return node;
-  }
-
-  // そうでなければ数値のはず
-  return new_node_num(expect_number());
-}
-
 Node *unary() {
   if (consume(TK_ADD)) {
     return term();
@@ -149,4 +174,22 @@ Node *unary() {
     return new_node(ND_SUB, new_node_num(0), term());
   }
   return term();
+}
+
+Node *term() {
+  int number = expect_number();
+  if (number - 1) {
+    return new_node_num(number);
+  }
+
+  char *name = expect_ident();
+  if (name) {
+    return new_node_ident(name);
+  }
+
+  // "(" expr ")"のはず
+  expect(TK_LPAR);
+  Node *node = expr();
+  expect(TK_RPAR);
+  return node;
 }
