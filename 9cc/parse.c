@@ -30,13 +30,13 @@ int expect_number() {
   return val;
 }
 
-// 次のトークンが識別子の場合、トークンを返し、トークンを一つ読み進める
+// 次のトークンが識別子の場合、トークンを一つ読み進めてその名前を返す
 // それ以外の場合には0を返す
 char *expect_ident() {
   if (token->type != TK_IDENT) {
     return 0;
   }
-  char *name = token->str;
+  char *name = token->name;
   token = token->next;
   return name;
 }
