@@ -71,10 +71,32 @@ Node *new_node_num(int val) {
   return node;
 }
 
+// 変数を名前で検索する
+// 見つからなかった場合はNULLを返す
+LVar *find_lvar(char *name) {
+  for (LVar *var = locals; var; var = var->next) {
+    if (var->len == strlen(name) && !memcmp(name, var->name, var->len)) {
+      return var;
+    }
+  }
+  return NULL;
+}
 Node *new_node_ident(char *name) {
   Node *node = calloc(1, sizeof(Node));
   node->type = ND_LVAR;
-  node->offset = (name[0] - 'a' + 1) * 8;
+  LVar *lvar = find_lvar(name);
+  
+  if (lvar) {
+    node->offset = lvar->offset;
+  } else {
+    lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals;
+    lvar->name = name;
+    lvar->len = strlen(name);
+    lvar->offset = locals ? locals->offset + 8 : 0;
+    node->offset = lvar->offset;
+    locals = lvar;
+  }
   return node;
 }
 

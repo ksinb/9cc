@@ -35,5 +35,7 @@ try 0 "3 > 5;"
 try 0 "(1 + 2) > (3 + 5);"
 try 3 "a = 3; a;"
 try 5 "a = 3; a + 2;"
+try 6 "a=3; 2*a;"
 try 15 "a = 4; b = 5 * 6 - 8; a + b / 2;"
+try 30 "ab = 10; cd = 20; ab+cd;"
 echo OK

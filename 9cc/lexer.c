@@ -10,6 +10,14 @@ Token *new_token(int type, Token *cur, char *str)
   return tok;
 }
 
+// 英数字かアンダースコアかどうか判定
+int is_alnum(char c) {
+  return ('a' <= c && c <= 'z') ||
+         ('A' <= c && c <= 'Z') ||
+         ('0' <= c && c <= '9') ||
+          (c == '_');
+}
+
 // 入力文字列pをトークナイズしてそれを返す
 Token *tokenize(char *p)
 {
@@ -116,9 +124,14 @@ Token *tokenize(char *p)
 
     if ('a' <= *p && *p <= 'z')
     {
+      int j = 0;
+      // 変数が何文字続くかカウント
+      do {
+        j++;
+      } while (is_alnum(p[j]));
       cur = new_token(TK_IDENT, cur, p);
-      cur->name = p;
-      p++;
+      cur->name = strndup(p, j);
+      p += j;
       continue;
     }
 
