@@ -14,6 +14,7 @@ enum {
   TK_IF,     // if
   TK_ELSE,   // else
   TK_WHILE,  // while
+  TK_FOR,    // for
   TK_ADD,    // +
   TK_SUB,    // -
   TK_DIV,    // /
@@ -49,6 +50,7 @@ typedef enum {
   ND_IF,     // if
   ND_IF_ELSE,// if else
   ND_WHILE,  // while
+  ND_FOR,    // for
   ND_ADD,    // +
   ND_SUB,    // -
   ND_DIV,    // /
@@ -68,9 +70,11 @@ struct Node {
   Node *rhs;          // 右辺
   int val;            // typeがND_NUMの場合のみ使う
   int offset;         // typeがND_LVARの場合のみ使う
-  Node *cond;         // typeがND_IF|ND_IF_ELSE|ND_WHILEの場合のみ使う
+  Node *cond;         // typeがND_IF|ND_IF_ELSE|ND_WHILE|ND_FORの場合のみ使う
   Node *then_stmt;    // typeがND_IF|ND_IF_ELSE|ND_WHILEの場合のみ使う
   Node *else_stmt;    // typeがND_IF_ELSEの場合のみ使う
+  Node *init_cond;    // typeがND_FORの場合のみ
+  Node *update_cond;    // typeがND_FORの場合のみ
 };
 
 typedef struct LVar LVar;

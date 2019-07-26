@@ -62,6 +62,13 @@ Token *tokenize(char *p)
       continue;
     }
 
+    if (strncmp(p, "for", 3) == 0 && !is_alnum(p[3]))
+    {
+      cur = new_token(TK_FOR, cur, p);
+      p += 3;
+      continue;
+    }
+
     if (strncmp(p, "==", 2) == 0)
     {
       cur = new_token(TK_EQ_EQ, cur, p);

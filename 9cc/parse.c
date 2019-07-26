@@ -145,6 +145,38 @@ Node *stmt() {
     return node;
   }
 
+  // "for" "(" expr? ";" expr? ";" expr? ")" stmt
+  if (consume(TK_FOR)) {
+    node = calloc(1, sizeof(Node));
+    node->type = ND_FOR;
+    
+    expect(TK_LPAR);
+
+    if (consume(TK_SEMC)) {
+      node->init_cond = NULL;
+    } else {
+      node->init_cond = expr();
+      expect(TK_SEMC);
+    }
+    
+    if (consume(TK_SEMC)) {
+      node->cond = NULL;
+    } else {
+      node->cond = expr();
+      expect(TK_SEMC);
+    }
+
+    if (consume(TK_RPAR)) {
+      node->update_cond = NULL;
+    } else {
+      node->update_cond = expr();
+      expect(TK_RPAR);
+    }
+    
+    node->then_stmt = stmt();
+    return node;
+  }
+
   // "return" expr ";"
   if (consume(TK_RETURN)) {
     node = new_node(ND_RETURN, expr(), NULL);    

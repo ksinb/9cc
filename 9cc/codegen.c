@@ -66,6 +66,31 @@ void gen(Node *node) {
     return;
   }
 
+  if (node->type == ND_FOR) {
+    int _label_count = label_count;
+    label_count++;
+
+    if (node->init_cond) {
+      gen(node->init_cond);
+    }
+    printf(".Lbegin%d:\n", _label_count);
+    if (node->cond) {
+      gen(node->cond);
+      printf("    pop rax\n");
+      printf("    cmp rax, 0\n");
+      printf("    je  .Lend%d\n", _label_count);
+    }
+    gen(node->then_stmt);
+    if (node->update_cond) {
+      gen(node->update_cond);
+    }
+    printf("    jmp .Lbegin%d\n", _label_count);
+    if (node->cond) {
+      printf(".Lend%d:\n", _label_count);
+    }
+    return;
+  }
+
   switch (node->type) {
     case ND_NUM:
       printf("    push %d\n", node->val);
