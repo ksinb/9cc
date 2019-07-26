@@ -25,6 +25,7 @@ void gen(Node *node) {
   if (node->type == ND_IF) {
     int _label_count = label_count;
     label_count++;
+
     gen(node->cond);
     printf("    pop rax\n");
     printf("    cmp rax, 0\n");
@@ -37,6 +38,7 @@ void gen(Node *node) {
   if (node->type == ND_IF_ELSE) {
     int _label_count = label_count;
     label_count++;
+
     gen(node->cond);
     printf("    pop rax\n");
     printf("    cmp rax, 0\n");
@@ -45,6 +47,21 @@ void gen(Node *node) {
     printf("    jmp .Lend%d\n", _label_count);
     printf(".Lelse%d:\n", _label_count);
     gen(node->else_stmt);
+    printf(".Lend%d:\n", _label_count);
+    return;
+  }
+
+  if (node->type == ND_WHILE) {
+    int _label_count = label_count;
+    label_count++;
+
+    printf(".Lbegin%d:\n", _label_count);
+    gen(node->cond);
+    printf("    pop rax\n");
+    printf("    cmp rax, 0\n");
+    printf("    je  .Lend%d\n", _label_count);
+    gen(node->then_stmt);
+    printf("    jmp .Lbegin%d\n", _label_count);
     printf(".Lend%d:\n", _label_count);
     return;
   }

@@ -131,6 +131,20 @@ Node *stmt() {
     return node;
   }
 
+  // "while" "(" expr ")" stmt
+  if (consume(TK_WHILE)) {
+    expect(TK_LPAR);
+    Node *while_expr = expr();
+    expect(TK_RPAR);
+    Node *while_stmt = stmt();
+    
+    node = calloc(1, sizeof(Node));
+    node->type = ND_WHILE;
+    node->cond = while_expr;
+    node->then_stmt = while_stmt;
+    return node;
+  }
+
   // "return" expr ";"
   if (consume(TK_RETURN)) {
     node = new_node(ND_RETURN, expr(), NULL);    
