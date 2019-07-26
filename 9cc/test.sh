@@ -38,4 +38,6 @@ try 5 "a = 3; a + 2;"
 try 6 "a=3; 2*a;"
 try 15 "a = 4; b = 5 * 6 - 8; a + b / 2;"
 try 30 "ab = 10; cd = 20; ab+cd;"
+try 3 "returned = 3; return returned;"
+try 14 "a = 3; b = 5 * 6 - 8; return a + b / 2;"
 echo OK

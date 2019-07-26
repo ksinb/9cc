@@ -109,7 +109,14 @@ void *program() {
 }
 
 Node *stmt() {
-  Node *node = expr();
+  Node *node;
+
+  if (consume(TK_RETURN)) {
+    node = new_node(ND_RETURN, expr(), NULL);    
+  } else {
+    node = expr();
+  }
+  
   expect(TK_SEMC);
   return node;
 }

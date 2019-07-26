@@ -10,6 +10,7 @@
 enum {
   TK_NUM,    // 数値
   TK_IDENT,  // 識別子
+  TK_RETURN, // return
   TK_ADD,    // +
   TK_SUB,    // -
   TK_DIV,    // /
@@ -39,6 +40,9 @@ struct Token {
 
 // 抽象構文木のノードの型
 typedef enum {
+  ND_NUM,    // 数値
+  ND_LVAR,  // ローカル変数
+  ND_RETURN, // return
   ND_ADD,    // +
   ND_SUB,    // -
   ND_DIV,    // /
@@ -47,9 +51,7 @@ typedef enum {
   ND_EQ,     // ==
   ND_NE,     // !=
   ND_LT,     // <
-  ND_LE,     // <=  
-  ND_LVAR,   // ローカル変数
-  ND_NUM     // 整数
+  ND_LE     // <=  
 } NodeType;
 
 typedef struct Node Node;
