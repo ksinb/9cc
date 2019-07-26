@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+int label_count = 0;
+
 void gen_lval(Node *node) {
   if (node->type != ND_LVAR) {
     error("代入の左辺値が変数ではありません");
@@ -13,10 +15,37 @@ void gen_lval(Node *node) {
 void gen(Node *node) {
   if (node->type == ND_RETURN) {
     gen(node->lhs);
-    printf("  pop rax\n");
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
+    printf("    pop rax\n");
+    printf("    mov rsp, rbp\n");
+    printf("    pop rbp\n");
+    printf("    ret\n");
+    return;
+  }
+
+  if (node->type == ND_IF) {
+    int _label_count = label_count;
+    label_count++;
+    gen(node->cond);
+    printf("    pop rax\n");
+    printf("    cmp rax, 0\n");
+    printf("    je  .Lend%d\n", _label_count);
+    gen(node->then_stmt);
+    printf(".Lend%d:\n", _label_count);
+    return;
+  }
+  
+  if (node->type == ND_IF_ELSE) {
+    int _label_count = label_count;
+    label_count++;
+    gen(node->cond);
+    printf("    pop rax\n");
+    printf("    cmp rax, 0\n");
+    printf("    je  .Lelse%d\n", _label_count);
+    gen(node->then_stmt);
+    printf("    jmp .Lend%d\n", _label_count);
+    printf(".Lelse%d:\n", _label_count);
+    gen(node->else_stmt);
+    printf(".Lend%d:\n", _label_count);
     return;
   }
 

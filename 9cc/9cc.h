@@ -11,6 +11,8 @@ enum {
   TK_NUM,    // 数値
   TK_IDENT,  // 識別子
   TK_RETURN, // return
+  TK_IF,     // if
+  TK_ELSE,   // else
   TK_ADD,    // +
   TK_SUB,    // -
   TK_DIV,    // /
@@ -41,8 +43,10 @@ struct Token {
 // 抽象構文木のノードの型
 typedef enum {
   ND_NUM,    // 数値
-  ND_LVAR,  // ローカル変数
+  ND_LVAR,   // ローカル変数
   ND_RETURN, // return
+  ND_IF,     // if
+  ND_IF_ELSE,// if else
   ND_ADD,    // +
   ND_SUB,    // -
   ND_DIV,    // /
@@ -57,11 +61,14 @@ typedef enum {
 typedef struct Node Node;
 
 struct Node {
-  NodeType type; // ノードの型
-  Node *lhs;     // 左辺
-  Node *rhs;     // 右辺
-  int val;       // kindがND_NUMの場合のみ使う
-  int offset;    // kindがND_LVARの場合のみ使う
+  NodeType type;      // ノードの型
+  Node *lhs;          // 左辺
+  Node *rhs;          // 右辺
+  int val;            // typeがND_NUMの場合のみ使う
+  int offset;         // typeがND_LVARの場合のみ使う
+  Node *cond;         // typeがND_IF|ND_IF_ELSEの場合のみ使う
+  Node *then_stmt;    // typeがND_IF|ND_IF_ELSEの場合のみ使う
+  Node *else_stmt;    // typeがND_IF_ELSEの場合のみ使う
 };
 
 typedef struct LVar LVar;

@@ -111,6 +111,27 @@ void *program() {
 Node *stmt() {
   Node *node;
 
+  // "if" "(" expr ")" stmt ("else" stmt)?
+  if (consume(TK_IF)) {
+    expect(TK_LPAR);
+    Node *if_expr = expr();
+    expect(TK_RPAR);
+    Node *if_stmt = stmt();
+    
+    node = calloc(1, sizeof(Node));
+    node->cond = if_expr;
+    node->then_stmt = if_stmt;
+    
+    if (consume(TK_ELSE)) {
+      node->type = ND_IF_ELSE;
+      node->else_stmt = stmt();
+    } else {
+      node->type = ND_IF;
+    }
+    return node;
+  }
+
+  // "return" expr ";"
   if (consume(TK_RETURN)) {
     node = new_node(ND_RETURN, expr(), NULL);    
   } else {

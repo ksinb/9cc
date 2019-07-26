@@ -40,4 +40,6 @@ try 15 "a = 4; b = 5 * 6 - 8; a + b / 2;"
 try 30 "ab = 10; cd = 20; ab+cd;"
 try 3 "returned = 3; return returned;"
 try 14 "a = 3; b = 5 * 6 - 8; return a + b / 2;"
+try 5 "a = 10; if (1 == 2) a = 20; return a-5;"
+try 25 "a = 0; if (1 == 2) a = 20; else a = 30; return a-5;"
 echo OK
