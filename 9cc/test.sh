@@ -46,4 +46,6 @@ try 5 "a = 0; while (a < 5) a = a + 1; return a;"
 try 15 "a = 10; i = 0; for (i = 0; i < 5; i = i+1) a = a + 1; return a;"
 try 5 "i = 0; for (; i < 5; ) i = i + 1; return i;"
 try 6 "i = 3; for (; ; i = i + 1) if (i > 5) return i;"
+try 3 "{ a = 1; b = 2; c = 3; } return 3;"
+try 3 "if (1 < 2) { a = 3; return 3; } else { b = 4; return 4; }"
 echo OK
