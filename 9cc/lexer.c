@@ -133,6 +133,18 @@ Token *tokenize(char *p)
       continue;
     }
 
+    if (*p == '{')
+    {
+      cur = new_token(TK_LBRACE, cur, p++);
+      continue;
+    }
+
+    if (*p == '}')
+    {
+      cur = new_token(TK_RBRACE, cur, p++);
+      continue;
+    }
+
     if (*p == '>')
     {
       cur = new_token(TK_GT, cur, p++);

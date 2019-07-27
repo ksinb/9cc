@@ -21,6 +21,8 @@ enum {
   TK_MUL,    // *
   TK_LPAR,   // (
   TK_RPAR,   // )
+  TK_LBRACE, // {
+  TK_RBRACE, // }    
   TK_EQ,     // =
   TK_EQ_EQ,  // ==
   TK_NOT_EQ, // !=
@@ -51,6 +53,7 @@ typedef enum {
   ND_IF_ELSE,// if else
   ND_WHILE,  // while
   ND_FOR,    // for
+  ND_BLOCK,  // ブロック
   ND_ADD,    // +
   ND_SUB,    // -
   ND_DIV,    // /
@@ -61,6 +64,12 @@ typedef enum {
   ND_LT,     // <
   ND_LE     // <=  
 } NodeType;
+
+typedef struct {
+  void **data;
+  int capacity;
+  int len;
+} Vector;
 
 typedef struct Node Node;
 
@@ -74,7 +83,8 @@ struct Node {
   Node *then_stmt;    // typeがND_IF|ND_IF_ELSE|ND_WHILEの場合のみ使う
   Node *else_stmt;    // typeがND_IF_ELSEの場合のみ使う
   Node *init_cond;    // typeがND_FORの場合のみ
-  Node *update_cond;    // typeがND_FORの場合のみ
+  Node *update_cond;  // typeがND_FORの場合のみ
+  Vector *statements;  // typeがND_BLOCKの場合のみ
 };
 
 typedef struct LVar LVar;
@@ -116,3 +126,7 @@ Node *term();
 
 // codegen
 void gen(Node *node);
+
+// vector
+Vector *new_vector();
+void vec_push(Vector *vec, void *elem);

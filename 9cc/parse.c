@@ -111,6 +111,18 @@ void *program() {
 Node *stmt() {
   Node *node;
 
+  //
+  if (consume(TK_LBRACE)) {
+    Vector *vec = new_vector();
+    while (!consume(TK_RBRACE)) {
+      vec_push(vec, stmt());
+    }
+    node = calloc(1, sizeof(Node));
+    node->type = ND_BLOCK;
+    node->statements = vec;
+    return node;
+  }
+
   // "if" "(" expr ")" stmt ("else" stmt)?
   if (consume(TK_IF)) {
     expect(TK_LPAR);
@@ -176,7 +188,7 @@ Node *stmt() {
     node->then_stmt = stmt();
     return node;
   }
-
+  
   // "return" expr ";"
   if (consume(TK_RETURN)) {
     node = new_node(ND_RETURN, expr(), NULL);    

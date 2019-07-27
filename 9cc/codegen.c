@@ -13,6 +13,16 @@ void gen_lval(Node *node) {
 }
 
 void gen(Node *node) {
+  if (node->type == ND_BLOCK) {
+    Vector *statements = node->statements;
+    for (int i = 0; i < statements->len; i++) {
+      Node *node = (Node *)statements->data[i];
+      gen(node);
+      printf("    pop rax\n");
+    }
+    return;
+  }
+
   if (node->type == ND_RETURN) {
     gen(node->lhs);
     printf("    pop rax\n");
