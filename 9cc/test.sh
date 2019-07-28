@@ -4,14 +4,14 @@ try() {
   input=$2
 
   ./9cc "$input" > tmp.s
-  gcc -o tmp tmp.s
+    gcc -static -o tmp tmp.s test/*.o
   ./tmp
   actual="$?"
-
+  
   if [ "$actual" = "$expected" ]; then
-    echo "$input => $actual"
+    echo "OK: $input => $actual"
   else 
-    echo "$input => $expected expected, but got $actual"
+    echo "NG: $input => $expected expected, but got $actual"
     exit 1
   fi
 }
@@ -48,4 +48,12 @@ try 5 "i = 0; for (; i < 5; ) i = i + 1; return i;"
 try 6 "i = 3; for (; ; i = i + 1) if (i > 5) return i;"
 try 3 "{ a = 1; b = 2; c = 3; } return 3;"
 try 3 "if (1 < 2) { a = 3; return 3; } else { b = 4; return 4; }"
-echo OK
+try 55 '{return foo1(55);}'
+try 3  '{return foo2(1, 2);}'
+try 6  '{return foo3(1, 2, 3);}'
+try 10 '{return foo4(1, 2, 3, 4);}'
+try 15 '{return foo5(1, 2, 3, 4, 5);}'
+try 21 '{return foo6(1, 2, 3, 4, 5, 6);}'
+try 12 '{a = foo1(1); b = foo2(2, 3); c = foo3(1, 2, 3); return a + b + c;}'
+
+echo "all passed"

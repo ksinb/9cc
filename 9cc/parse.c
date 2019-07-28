@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+Vector *arguments();
+
 // エラーを報告するための関数
 // printfと同じ引数を取る
 void error(char *fmt, ...) {
@@ -285,6 +287,7 @@ Node *unary() {
 }
 
 Node *term() {
+  // num
   int number = expect_number();
   if (number != -1) {
     return new_node_num(number);
@@ -292,7 +295,24 @@ Node *term() {
 
   char *name = expect_ident();
   if (name) {
-    return new_node_ident(name);
+    if (!consume(TK_LPAR)) {
+      // 変数
+      return new_node_ident(name);
+    }
+    // 関数の呼び出し
+    Vector *params = new_vector();
+    while (!consume(TK_RPAR)) {
+      if (params->len > 0) {
+        expect(TK_COMMA);
+      }
+      vec_push(params, (void *)term());
+    }
+    Node *node = calloc(1, sizeof(Node));
+    node->type = ND_FUNC_CALL;
+    node->name = name;
+    node->params = params;
+
+    return node;
   }
 
   // "(" expr ")"のはず

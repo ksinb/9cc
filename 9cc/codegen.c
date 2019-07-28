@@ -101,6 +101,19 @@ void gen(Node *node) {
     return;
   }
 
+  if (node->type == ND_FUNC_CALL) {
+   Vector *params = node->params;
+   char *registers[6] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
+   for (int i = 0; i < params->len; i++) {
+     Node *node = (Node *)params->data[i];
+     gen(node);
+     printf("   pop %s\n", registers[i]);
+   }
+   printf("   call %s\n", node->name);
+   printf("   push rax\n");
+   return;
+  }
+
   switch (node->type) {
     case ND_NUM:
       printf("    push %d\n", node->val);

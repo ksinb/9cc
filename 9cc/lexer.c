@@ -163,6 +163,12 @@ Token *tokenize(char *p)
       continue;
     }
 
+    if (*p == ',')
+    {
+      cur = new_token(TK_COMMA, cur, p++);
+      continue;
+    }
+
     if (*p == '=')
     {
       cur = new_token(TK_EQ, cur, p++);

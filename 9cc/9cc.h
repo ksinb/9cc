@@ -30,6 +30,7 @@ enum {
   TK_LE,     // <=  
   TK_GT,     // >
   TK_GE,     // >=
+  TK_COMMA,  // ,
   TK_SEMC,   // ; 
   TK_EOF     // 入力の終わりを表すトークン
 };
@@ -46,6 +47,7 @@ struct Token {
 
 // 抽象構文木のノードの型
 typedef enum {
+  ND_IDENT,  // 識別子
   ND_NUM,    // 数値
   ND_LVAR,   // ローカル変数
   ND_RETURN, // return
@@ -54,6 +56,7 @@ typedef enum {
   ND_WHILE,  // while
   ND_FOR,    // for
   ND_BLOCK,  // ブロック
+  ND_FUNC_CALL, // 関数呼び出し
   ND_ADD,    // +
   ND_SUB,    // -
   ND_DIV,    // /
@@ -77,6 +80,7 @@ struct Node {
   NodeType type;      // ノードの型
   Node *lhs;          // 左辺
   Node *rhs;          // 右辺
+  char *name;         // typeがND_IDENTの場合
   int val;            // typeがND_NUMの場合のみ使う
   int offset;         // typeがND_LVARの場合のみ使う
   Node *cond;         // typeがND_IF|ND_IF_ELSE|ND_WHILE|ND_FORの場合のみ使う
@@ -84,7 +88,8 @@ struct Node {
   Node *else_stmt;    // typeがND_IF_ELSEの場合のみ使う
   Node *init_cond;    // typeがND_FORの場合のみ
   Node *update_cond;  // typeがND_FORの場合のみ
-  Vector *statements;  // typeがND_BLOCKの場合のみ
+  Vector *statements; // typeがND_BLOCKの場合のみ
+  Vector *params;  // typeがND_FUNC_CALL
 };
 
 typedef struct LVar LVar;
