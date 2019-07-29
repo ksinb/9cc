@@ -89,7 +89,7 @@ struct Node {
   Node *init_cond;    // typeがND_FORの場合のみ
   Node *update_cond;  // typeがND_FORの場合のみ
   Vector *statements; // typeがND_BLOCKの場合のみ
-  Vector *params;  // typeがND_FUNC_CALL
+  Vector *args;       // typeがND_FUNC_CALL
 };
 
 typedef struct LVar LVar;

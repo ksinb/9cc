@@ -113,7 +113,7 @@ void *program() {
 Node *stmt() {
   Node *node;
 
-  //
+  // "{" stmt* "}"
   if (consume(TK_LBRACE)) {
     Vector *vec = new_vector();
     while (!consume(TK_RBRACE)) {
@@ -300,17 +300,17 @@ Node *term() {
       return new_node_ident(name);
     }
     // 関数の呼び出し
-    Vector *params = new_vector();
+    Vector *args = new_vector();
     while (!consume(TK_RPAR)) {
-      if (params->len > 0) {
+      if (args->len > 0) {
         expect(TK_COMMA);
       }
-      vec_push(params, (void *)term());
+      vec_push(args, (void *)term());
     }
     Node *node = calloc(1, sizeof(Node));
     node->type = ND_FUNC_CALL;
     node->name = name;
-    node->params = params;
+    node->args = args;
 
     return node;
   }

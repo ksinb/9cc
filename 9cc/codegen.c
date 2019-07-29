@@ -102,10 +102,10 @@ void gen(Node *node) {
   }
 
   if (node->type == ND_FUNC_CALL) {
-   Vector *params = node->params;
+   Vector *args = node->args;
    char *registers[6] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
-   for (int i = 0; i < params->len; i++) {
-     Node *node = (Node *)params->data[i];
+   for (int i = 0; i < args->len; i++) {
+     Node *node = (Node *)args->data[i];
      gen(node);
      printf("   pop %s\n", registers[i]);
    }
