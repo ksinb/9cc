@@ -73,41 +73,47 @@ Node *new_node_num(int val) {
   return node;
 }
 
-// 変数を名前で検索する
-// 見つからなかった場合はNULLを返す
-LVar *find_lvar(char *name) {
-  for (LVar *var = locals; var; var = var->next) {
-    if (var->len == strlen(name) && !memcmp(name, var->name, var->len)) {
-      return var;
-    }
-  }
-  return NULL;
-}
-Node *new_node_ident(char *name) {
-  Node *node = calloc(1, sizeof(Node));
-  node->type = ND_LVAR;
-  LVar *lvar = find_lvar(name);
-  
-  if (lvar) {
-    node->offset = lvar->offset;
-  } else {
-    lvar = calloc(1, sizeof(LVar));
-    lvar->next = locals;
-    lvar->name = name;
-    lvar->len = strlen(name);
-    lvar->offset = locals ? locals->offset + 8 : 0;
-    node->offset = lvar->offset;
-    locals = lvar;
-  }
-  return node;
-}
-
 void *program() {
   int i = 0;
   while (!at_eof()) {
-    code[i++] = stmt();
+    code[i++] = function();
   }
   code[i] = NULL;
+}
+
+Node *function() {
+  char *name = expect_ident();
+  
+  // Function
+  if (consume(TK_LPAR)) {
+    Node *node = calloc(1, sizeof(Node));
+    node->type = ND_FUNC_DEF;
+    node->name = name;
+    
+    Vector *params = new_vector();
+    while (!consume(TK_RPAR)) {
+      if (params->len > 0)  {
+        expect(TK_COMMA);
+      }
+      vec_push(params, (void * )expect_ident());
+    }
+    node->params = params;
+    
+    expect(TK_LBRACE);
+    node->body = compound_stmt();
+    return node;
+  }
+}
+
+Node *compound_stmt() {
+  Node *node = calloc(1, sizeof(Node));
+  node->stmts = new_vector();
+
+  while (!consume(TK_RBRACE)) {
+    vec_push(node->stmts, stmt());
+  }
+  node->type = ND_COMP_STMT;
+  return node;
 }
 
 Node *stmt() {
@@ -115,14 +121,7 @@ Node *stmt() {
 
   // "{" stmt* "}"
   if (consume(TK_LBRACE)) {
-    Vector *vec = new_vector();
-    while (!consume(TK_RBRACE)) {
-      vec_push(vec, stmt());
-    }
-    node = calloc(1, sizeof(Node));
-    node->type = ND_BLOCK;
-    node->statements = vec;
-    return node;
+    return compound_stmt();
   }
 
   // "if" "(" expr ")" stmt ("else" stmt)?
@@ -287,6 +286,13 @@ Node *unary() {
 }
 
 Node *term() {
+  // "(" expr ")"
+  if (consume(TK_LPAR)) {
+    Node *node = expr();
+    expect(TK_RPAR);
+    return node;
+  }
+
   // num
   int number = expect_number();
   if (number != -1) {
@@ -297,7 +303,10 @@ Node *term() {
   if (name) {
     if (!consume(TK_LPAR)) {
       // 変数
-      return new_node_ident(name);
+      Node *node = calloc(1, sizeof(Node));
+      node->type = ND_IDENT;
+      node->name = name;
+      return node;
     }
     // 関数の呼び出し
     Vector *args = new_vector();
@@ -314,10 +323,4 @@ Node *term() {
 
     return node;
   }
-
-  // "(" expr ")"のはず
-  expect(TK_LPAR);
-  Node *node = expr();
-  expect(TK_RPAR);
-  return node;
 }

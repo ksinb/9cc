@@ -1,20 +1,40 @@
 #include "9cc.h"
 
 int label_count = 0;
+Map *vars;
+int stack_size;
+
+const char *registers[6] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 void gen_lval(Node *node) {
-  if (node->type != ND_LVAR) {
+  if (node->type != ND_IDENT) {
     error("代入の左辺値が変数ではありません");
   }
 
+  if (!map_exists(vars, node->name)) {
+    stack_size += 8;
+    map_put(vars, node->name, (void *)(intptr_t)stack_size);
+  }
+
+  int offset = (intptr_t)map_get(vars, node->name);
   printf("    mov rax, rbp\n");
-  printf("    sub rax, %d\n", node->offset);
+  printf("    sub rax, %d\n", offset);
   printf("    push rax\n");
 }
 
+void gen_args(Vector *nodes) {
+  if (nodes->len == 0) {
+    return;
+  }
+
+  for (int i = 0; i < nodes->len; i++) {
+    printf("    mov [rbp-%d], %s\n", (i+1) * 8, registers[i]);
+  }
+}
+
 void gen(Node *node) {
-  if (node->type == ND_BLOCK) {
-    Vector *statements = node->statements;
+  if (node->type == ND_COMP_STMT) {
+    Vector *statements = node->stmts;
     for (int i = 0; i < statements->len; i++) {
       Node *node = (Node *)statements->data[i];
       gen(node);
@@ -102,23 +122,20 @@ void gen(Node *node) {
   }
 
   if (node->type == ND_FUNC_CALL) {
-   Vector *args = node->args;
-   char *registers[6] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
-   for (int i = 0; i < args->len; i++) {
-     Node *node = (Node *)args->data[i];
-     gen(node);
-     printf("   pop %s\n", registers[i]);
-   }
-   printf("   call %s\n", node->name);
-   printf("   push rax\n");
-   return;
+    for (int i = 0; i < node->args->len; i++) {
+      gen((Node *)node->args->data[i]);
+      printf("    pop %s\n", registers[i]);
+    }
+    printf("    call %s\n", node->name);
+    printf("    push rax\n");
+    return;
   }
 
   switch (node->type) {
     case ND_NUM:
       printf("    push %d\n", node->val);
       return;
-    case ND_LVAR:
+    case ND_IDENT:
       gen_lval(node);
       printf("    pop rax\n");
       printf("    mov rax, [rax]\n");
@@ -128,50 +145,50 @@ void gen(Node *node) {
       gen_lval(node->lhs);
       gen(node->rhs);
 
-      printf("    pop rdi\n");
+      printf("    pop r10\n");
       printf("    pop rax\n");
-      printf("    mov [rax], rdi\n");
-      printf("    push rdi\n");
+      printf("    mov [rax], r10\n");
+      printf("    push r10\n");
       return;
   }
 
   gen(node->lhs);
   gen(node->rhs);
   
-  printf("    pop rdi\n");
+  printf("    pop r10\n");
   printf("    pop rax\n");
 
   switch (node->type) {
     case ND_ADD:
-      printf("    add rax, rdi\n");
+      printf("    add rax, r10\n");
       break;
     case ND_SUB:
-      printf("    sub rax, rdi\n");
+      printf("    sub rax, r10\n");
       break;
     case ND_MUL:
-      printf("    imul rax, rdi\n");
+      printf("    imul rax, r10\n");
       break;
     case ND_DIV:
       printf("    cqo\n");
-      printf("    idiv rdi\n");
+      printf("    idiv r10\n");
       break;
     case ND_EQ: 
-      printf("    cmp rax, rdi\n");
+      printf("    cmp rax, r10\n");
       printf("    sete al\n");
       printf("    movzb rax, al\n");
       break;
     case ND_NE: 
-      printf("    cmp rax, rdi\n");
+      printf("    cmp rax, r10\n");
       printf("    setne al\n");
       printf("    movzb rax, al\n");
       break;
     case ND_LE: 
-      printf("    cmp rax, rdi\n");
+      printf("    cmp rax, r10\n");
       printf("    setle al\n");
       printf("    movzb rax, al\n");
       break;
     case ND_LT: 
-      printf("    cmp rax, rdi\n");
+      printf("    cmp rax, r10\n");
       printf("    setl al\n");
       printf("    movzb rax, al\n");
       break;
@@ -179,3 +196,22 @@ void gen(Node *node) {
 
   printf("    push rax\n");
 }  
+
+void gen_func(Node *node) {
+  stack_size = 0;
+  vars = new_map();
+  
+  printf("%s:\n", node->name);
+
+  // プロローグ
+  // 変数26個分の領域を確保する
+  printf("    push rbp\n");
+  printf("    mov rbp, rsp\n");
+  printf("    sub rsp, 208\n");
+
+  gen_args(node->params);
+
+  for (int i = 0; i < node->body->stmts->len; i++) {
+    gen((Node *)node->body->stmts->data[i]);
+  }
+}
