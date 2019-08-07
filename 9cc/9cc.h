@@ -104,8 +104,11 @@ struct Node {
   NodeType type;      // ノードの型
   Node *lhs;          // 左辺
   Node *rhs;          // 右辺
+  Node *expr;
+  
   char *name;         // typeがND_IDENT, ND_FUNC_DEFの場合
   int val;            // typeがND_NUMの場合のみ使う
+  
   Node *cond;         // typeがND_IF|ND_IF_ELSE|ND_WHILE|ND_FORの場合のみ使う
   Node *then_stmt;    // typeがND_IF|ND_IF_ELSE|ND_WHILEの場合のみ使う
   Node *else_stmt;    // typeがND_IF_ELSEの場合のみ使う

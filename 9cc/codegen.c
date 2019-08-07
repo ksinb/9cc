@@ -44,7 +44,7 @@ void gen(Node *node) {
   }
 
   if (node->type == ND_RETURN) {
-    gen(node->lhs);
+    gen(node->expr);
     printf("    pop rax\n");
     printf("    mov rsp, rbp\n");
     printf("    pop rbp\n");
@@ -151,10 +151,10 @@ void gen(Node *node) {
       printf("    push r10\n");
       return;
     case ND_ADDR:
-      gen_lval(node->lhs);
+      gen_lval(node->expr);
       return;
     case ND_DEREF:
-      gen(node->lhs);
+      gen(node->expr);
       printf("    pop rax\n");
       printf("    mov rax, [rax]\n");
       printf("    push rax\n");

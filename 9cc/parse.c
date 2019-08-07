@@ -58,17 +58,27 @@ bool consume(int type) {
   return true;
 }
 
-Node *new_node(NodeType type, Node *lhs, Node *rhs) {
+Node *new_node(NodeType type) {
   Node *node = calloc(1, sizeof(Node));
   node->type = type;
+  return node;
+}
+
+Node *new_binop(NodeType type, Node *lhs, Node *rhs) {
+  Node *node = new_node(type);
   node->lhs = lhs;
   node->rhs = rhs;
   return node;
 }
 
+Node *new_expr(NodeType type, Node *expr) {
+  Node *node = new_node(type);
+  node->expr = expr;
+  return node;
+}
+
 Node *new_node_num(int val) {
-  Node *node = calloc(1, sizeof(Node));
-  node->type = ND_NUM;
+  Node *node = new_node(ND_NUM);
   node->val = val;
   return node;
 }
@@ -86,8 +96,7 @@ Node *function() {
   
   // Function
   if (consume(TK_LPAR)) {
-    Node *node = calloc(1, sizeof(Node));
-    node->type = ND_FUNC_DEF;
+    Node *node = new_node(ND_FUNC_DEF);
     node->name = name;
     
     Vector *params = new_vector();
@@ -106,13 +115,13 @@ Node *function() {
 }
 
 Node *compound_stmt() {
-  Node *node = calloc(1, sizeof(Node));
+  Node *node = new_node(ND_COMP_STMT);
   node->stmts = new_vector();
 
   while (!consume(TK_RBRACE)) {
     vec_push(node->stmts, stmt());
   }
-  node->type = ND_COMP_STMT;
+
   return node;
 }
 
@@ -151,8 +160,7 @@ Node *stmt() {
     expect(TK_RPAR);
     Node *while_stmt = stmt();
     
-    node = calloc(1, sizeof(Node));
-    node->type = ND_WHILE;
+    node = new_node(ND_WHILE);
     node->cond = while_expr;
     node->then_stmt = while_stmt;
     return node;
@@ -160,8 +168,7 @@ Node *stmt() {
 
   // "for" "(" expr? ";" expr? ";" expr? ")" stmt
   if (consume(TK_FOR)) {
-    node = calloc(1, sizeof(Node));
-    node->type = ND_FOR;
+    node = new_node(ND_FOR);
     
     expect(TK_LPAR);
 
@@ -192,7 +199,7 @@ Node *stmt() {
   
   // "return" expr ";"
   if (consume(TK_RETURN)) {
-    node = new_node(ND_RETURN, expr(), NULL);    
+    node = new_expr(ND_RETURN, expr());    
   } else {
     node = expr();
   }
@@ -208,7 +215,7 @@ Node *expr() {
 Node *assign() {
   Node *node = equility();
   if (consume(TK_EQ)) {
-    node = new_node(ND_ASSIGN, node, assign());
+    node = new_binop(ND_ASSIGN, node, assign());
   }
   return node;
 }
@@ -218,9 +225,9 @@ Node *equility() {
 
   for (;;) {
     if (consume(TK_EQ_EQ)) {
-      node = new_node(ND_EQ, node, relational());
+      node = new_binop(ND_EQ, node, relational());
     } else if (consume(TK_NOT_EQ)) {
-      node = new_node(ND_NE, node, relational());
+      node = new_binop(ND_NE, node, relational());
     } else {
       return node;
     }
@@ -232,16 +239,16 @@ Node *relational() {
 
   for (;;) {
     if (consume(TK_LT)) {
-      return new_node(ND_LT, node, add());
+      return new_binop(ND_LT, node, add());
     } 
     if (consume(TK_GT)) {
-      return new_node(ND_LT, add(), node);
+      return new_binop(ND_LT, add(), node);
     }
     if (consume(TK_LE)) {
-      return new_node(ND_LE, node, add());
+      return new_binop(ND_LE, node, add());
     }
     if (consume(TK_GE)) {
-      return new_node(ND_LE, add(), node);
+      return new_binop(ND_LE, add(), node);
     }
     return node;
   }
@@ -252,9 +259,9 @@ Node *add() {
 
   for (;;) {
     if (consume(TK_ADD)) {
-      node = new_node(ND_ADD, node, mul());
+      node = new_binop(ND_ADD, node, mul());
     } else if (consume(TK_SUB)) {
-      node = new_node(ND_SUB, node, mul());
+      node = new_binop(ND_SUB, node, mul());
     } else {
       return node;
     }
@@ -266,9 +273,9 @@ Node *mul() {
   
   for (;;) {
     if (consume(TK_MUL)) {
-      node = new_node(ND_MUL, node, unary());
+      node = new_binop(ND_MUL, node, unary());
     } else if (consume(TK_DIV)) {
-      node = new_node(ND_DIV, node, unary());
+      node = new_binop(ND_DIV, node, unary());
     } else {
       return node;
     }
@@ -280,13 +287,13 @@ Node *unary() {
     return term();
   }
   if (consume(TK_SUB)) {
-    return new_node(ND_SUB, new_node_num(0), term());
+    return new_binop(ND_SUB, new_node_num(0), term());
   }
   if (consume(TK_MUL)) {
-    return new_node(ND_DEREF, unary(), NULL);
+    return new_expr(ND_DEREF, unary());
   }
   if (consume(TK_AND)) {
-    return new_node(ND_ADDR, unary(), NULL);
+    return new_expr(ND_ADDR, unary());
   }
   return term();
 }
@@ -309,8 +316,7 @@ Node *term() {
   if (name) {
     if (!consume(TK_LPAR)) {
       // 変数
-      Node *node = calloc(1, sizeof(Node));
-      node->type = ND_IDENT;
+      Node *node = new_node(ND_IDENT);
       node->name = name;
       return node;
     }
@@ -322,8 +328,7 @@ Node *term() {
       }
       vec_push(args, (void *)term());
     }
-    Node *node = calloc(1, sizeof(Node));
-    node->type = ND_FUNC_CALL;
+    Node *node = new_node(ND_FUNC_CALL);
     node->name = name;
     node->args = args;
 
