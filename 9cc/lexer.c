@@ -115,6 +115,12 @@ Token *tokenize(char *p)
       continue;
     }
 
+    if (*p == '&')
+    {
+      cur = new_token(TK_AND, cur, p++);
+      continue;
+    }
+
     if (*p == '/')
     {
       cur = new_token(TK_DIV, cur, p++);

@@ -42,6 +42,7 @@ enum {
   TK_SUB,    // -
   TK_DIV,    // /
   TK_MUL,    // *
+  TK_AND,    // &
   TK_LPAR,   // (
   TK_RPAR,   // )
   TK_LBRACE, // {
@@ -92,7 +93,9 @@ typedef enum {
   ND_EQ,        // ==
   ND_NE,        // !=
   ND_LT,        // <
-  ND_LE         // <=  
+  ND_LE,        // <=
+  ND_DEREF,     // *
+  ND_ADDR       // &
 } NodeType;
 
 typedef struct Node Node;
